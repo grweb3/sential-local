@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* --- BACKGROUNDS --- */
+    --bg-base: #07090F;
+    --bg-surface-1: #0D1018;
+    --bg-surface-2: #141820;
+    --bg-surface-3: #1C2130;
+    --bg-surface-4: #232A3C;
+
+    /* --- BRAND ACCENT --- */
+    --accent: #00C2FF;
+    --accent-dim: rgba(0, 194, 255, 0.12);
+    --accent-border: rgba(0, 194, 255, 0.25);
+
+    /* --- TEXT --- */
+    --text-1: #F1F3F7;
+    --text-2: #8B93A8;
+    --text-3: #4A5268;
+    --text-accent: #00C2FF;
+
+    /* --- SEMANTIC SEVERITY --- */
+    --critical: #FF3B30;
+    --high: #FF6B00;
+    --medium: #FFB800;
+    --low: #34C759;
+    --gas: #5E8BFF;
+
+    /* --- BORDERS --- */
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    --border-default: rgba(255, 255, 255, 0.09);
+    --border-strong: rgba(255, 255, 255, 0.15);
+    --border-accent: rgba(0, 194, 255, 0.30);
+
+    /* --- TYPOGRAPHY STACKS --- */
+    --font-display: "Instrument Serif", Georgia, serif;
+    --font-ui: "DM Sans", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", "Berkeley Mono", monospace;
+
+    /* --- MOTION TOKENS --- */
+    --dur-instant: 80ms;
+    --dur-fast: 160ms;
+    --dur-default: 240ms;
+    --dur-slow: 400ms;
+    --dur-crawl: 600ms;
+
+    --ease-default: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-in: cubic-bezier(0.4, 0, 1, 1);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-[var(--bg-base)] text-[var(--text-1)] antialiased selection:bg-[var(--accent-dim)] selection:text-[var(--text-1)];
+    font-family: var(--font-ui);
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-ui);
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+}
+
+@layer utilities {
+  /* --- CUSTOM SCROLLBAR (Minimalist) --- */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--bg-surface-3);
+    border-radius: 999px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--text-3);
+  }
+  
+  /* --- TEXT PRESETS --- */
+  .text-label {
+    @apply text-[13px] leading-[20px] font-medium tracking-[0.02em] text-[var(--text-2)];
+  }
+  .text-label-caps {
+    @apply text-[11px] leading-[18px] font-bold tracking-[0.08em] uppercase text-[var(--text-3)];
+  }
+}
+
+/* --- REDUCED MOTION OFF-SWITCH --- */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
