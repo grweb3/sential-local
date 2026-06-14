@@ -567,7 +567,7 @@ app.post('/api/audit/stream', async (req, res) => {
             const complexityCheck = await clients.groq.chat.completions.create({
                 // BUG FIX: Added optional chaining (?.) to prevent null string access
                 messages: [ { role: "system", content: gatekeeperPrompt }, { role: "user", content: finalSolidityCode?.substring(0, 30000) || "" } ],
-                model: "llama-3.1-8b-instant", response_format: { type: "json_object" }
+                model: "llama-3.3-70b-versatile", response_format: { type: "json_object" }
             });
             isComplex = JSON.parse(extractJSON(complexityCheck.choices[0]?.message?.content) || '{"is_complex": false}').is_complex;
         } catch (error) {
@@ -648,7 +648,7 @@ app.post('/api/audit/stream', async (req, res) => {
             try {
                 if (!clients.anthropic) throw new Error("Key missing");
                 sendEvent('log', { prefix: 'ROUTER', message: 'Routing hypothesis to Claude Opus 4.8 Judge...' });
-                fullJsonOutput = await streamAnthropic(clients.anthropic, "claude-3-opus-20260416", `${SYSTEM_PROMPT}\n\n${JUDGE_PROMPT}`, judgeMessages, sendEvent);
+                fullJsonOutput = await streamAnthropic(clients.anthropic, "claude-opus-4-8", `${SYSTEM_PROMPT}\n\n${JUDGE_PROMPT}`, judgeMessages, sendEvent);
             } catch (e1) {
                 sendEvent('log', { prefix: 'ERROR', message: `Claude Opus failed. Hot-swapping Judge to Zhipu GLM-5...` });
                 try {
