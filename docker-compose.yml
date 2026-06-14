@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  sential-engine:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+
+  sential-ui:
+    image: node:18-bullseye-slim
+    working_dir: /app
+    volumes:
+      - ./client:/app
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3001
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    depends_on:
+      - sential-engine
