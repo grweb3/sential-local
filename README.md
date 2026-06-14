@@ -137,7 +137,7 @@ Sential does not rely on a single AI model asking one question. It simulates a *
   │         ▼                                                       │
   │  ┌─────────────┐     Strips boilerplate, maps inheritance,      │
   │  │  GATEKEEPER │ ──► isolates high-risk logic vectors           │
-  │  │  (Triage)   │     Model: Groq Llama 4 Scout                  │
+  │  │  (Triage)   │     Model: Groq llama 3.3 70B                  │
   │  └──────┬──────┘                                               │
   │         │                                                       │
   │         ▼                                                       │
@@ -162,9 +162,9 @@ Sential does not rely on a single AI model asking one question. It simulates a *
 
 | Phase | Agent Role | Primary Model | Automatic Fallback Chain | Objective |
 |-------|-----------|---------------|--------------------------|-----------|
-| **Phase 1: Gatekeeper** | Semantic Triage | Groq Llama 4 Scout | Gemini 3.1 Pro | Analyzes payload complexity, strips boilerplate, maps inheritance graphs, and flags high-risk code vectors for deep analysis. |
-| **Phase 2: Red Team** | Exploit Synthesis | DeepSeek V4-Pro | MiniMax M3 → Gemini 3.1 Pro → Groq Llama 4 Scout | Adopts a hostile adversarial persona. Synthesizes a physical `.t.sol` Foundry test file designed to compromise the target contract. |
-| **Phase 3: Blue Team** | Verifier & Judge | Claude Opus 4.8 | Zhipu GLM-5.1 → Groq Llama 4 Scout → Gemini 3.1 Pro | Receives the target code and the Red Team's hypothesis. Performs logical verification, eliminates hallucinations, and formats telemetry into strict, structured JSON. |
+| **Phase 1: Gatekeeper** | Semantic Triage | Groq llama 3.3 70B | Gemini 3.1 Pro | Analyzes payload complexity, strips boilerplate, maps inheritance graphs, and flags high-risk code vectors for deep analysis. |
+| **Phase 2: Red Team** | Exploit Synthesis | DeepSeek V4-Pro | MiniMax M3 → Gemini 3.1 Pro → Groq llama 3.3 70B | Adopts a hostile adversarial persona. Synthesizes a physical `.t.sol` Foundry test file designed to compromise the target contract. |
+| **Phase 3: Blue Team** | Verifier & Judge | Claude Opus 4.8 | Zhipu GLM-5.1 → Groq llama 3.3 70B → Gemini 3.1 Pro | Receives the target code and the Red Team's hypothesis. Performs logical verification, eliminates hallucinations, and formats telemetry into strict, structured JSON. |
 | **Phase 4: Guillotine** | EVM Sandbox | Local Foundry Binary | *(Hardware Bound — No Fallback)* | Executes `forge test` inside the container. If the test passes, the vulnerability is confirmed `CRITICAL`. If it fails, the entry is downgraded to `[UNVERIFIED BY ENGINE]`. |
 
 > 🔁 **The Hot-Swap Waterfall:** If DeepSeek hits its rate limit during Phase 2, the engine automatically and silently switches to MiniMax M3, then Gemini 3.1 Pro, then Groq — without interrupting your audit. You only need **one working API key** to start a scan.
@@ -332,7 +332,7 @@ Sential needs at least **one** API key to talk to an AI model. All providers lis
 
 ### Groq (Recommended for Beginners — Fastest & Free)
 
-Groq runs **Llama 4 Scout** and is the fastest free option.
+Groq runs **llama 3.3 70B** and is the fastest free option.
 
 1. Go to [console.groq.com](https://console.groq.com/)
 2. Click **Sign Up** and create an account (free)
