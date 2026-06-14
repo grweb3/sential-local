@@ -502,9 +502,11 @@ app.post('/api/audit/stream', async (req, res) => {
     let { code, type, deepScan } = req.body;
     const reqId = crypto.randomBytes(4).toString('hex');
 
+    // BUG FIX: Removed 'finalSolidityCode = null' from this handler.
+    // Vite proxy half-closes streams on large payloads, which was causing
+    // the backend to prematurely wipe its own memory and crash.
     req.on('close', () => {
-        console.log(`[SYS] Client Request [${reqId}] disconnected prematurely. Purging RAM.`);
-        finalSolidityCode = null;
+        console.log(`[SYS] Client Request [${reqId}] TCP event detected (stream waiting).`);
     });
 
     sendEvent('log', { prefix: 'SYS', message: 'Establishing secure WebSocket connection to Local Engine... OK' });
@@ -563,7 +565,8 @@ app.post('/api/audit/stream', async (req, res) => {
         try {
             if (!clients.groq) throw new Error("Key missing");
             const complexityCheck = await clients.groq.chat.completions.create({
-                messages: [ { role: "system", content: gatekeeperPrompt }, { role: "user", content: finalSolidityCode.substring(0, 30000) } ],
+                // BUG FIX: Added optional chaining (?.) to prevent null string access
+                messages: [ { role: "system", content: gatekeeperPrompt }, { role: "user", content: finalSolidityCode?.substring(0, 30000) || "" } ],
                 model: "llama-3.1-8b-instant", response_format: { type: "json_object" }
             });
             isComplex = JSON.parse(extractJSON(complexityCheck.choices[0]?.message?.content) || '{"is_complex": false}').is_complex;
@@ -572,7 +575,7 @@ app.post('/api/audit/stream', async (req, res) => {
             try {
                 if (!clients.gemini) throw new Error("Key missing");
                 const gatekeeperModel = clients.gemini.getGenerativeModel({ model: 'gemini-3.1-pro-preview', generationConfig: { responseMimeType: "application/json" } });
-                const res = await gatekeeperModel.generateContent(`${gatekeeperPrompt}\n\nCODE:\n${finalSolidityCode.substring(0, 30000)}`);
+                const res = await gatekeeperModel.generateContent(`${gatekeeperPrompt}\n\nCODE:\n${finalSolidityCode?.substring(0, 30000) || ""}`);
                 isComplex = JSON.parse(extractJSON(res.response.text()) || '{"is_complex": false}').is_complex;
             } catch (fallbackError) {
                 isComplex = true; // Safest fallback is to assume it's complex if gatekeepers fail
@@ -580,7 +583,7 @@ app.post('/api/audit/stream', async (req, res) => {
         }
 
         let fullJsonOutput = "";
-        let triagingCode = finalSolidityCode.substring(0, 5000);
+        let triagingCode = finalSolidityCode?.substring(0, 5000) || "";
 
         // --- THE ADVERSARIAL TRIAD WATERFALL ---
         if (isComplex) {
@@ -591,13 +594,13 @@ app.post('/api/audit/stream', async (req, res) => {
                 if (!clients.groq) throw new Error("Key missing");
                 sendEvent('log', { prefix: 'ROUTER', message: 'Isolating high-risk logic vectors (Cost-Shield active)...' });
                 const groqTriage = await clients.groq.chat.completions.create({
-                    messages: [ { role: "system", content: "Extract only the most complex, non-standard, or highly privileged functions from this code." }, { role: "user", content: finalSolidityCode.substring(0, 40000) } ],
+                    messages: [ { role: "system", content: "Extract only the most complex, non-standard, or highly privileged functions from this code." }, { role: "user", content: finalSolidityCode?.substring(0, 40000) || "" } ],
                     model: "llama-3.3-70b-versatile", temperature: 0.1,
                 });
                 triagingCode = groqTriage.choices[0]?.message?.content || triagingCode;
             } catch (e) {
                 sendEvent('log', { prefix: 'ROUTER', message: 'Triage skipped. Proceeding with raw AST...' });
-                triagingCode = finalSolidityCode.substring(0, 40000);
+                triagingCode = finalSolidityCode?.substring(0, 40000) || "";
             }
 
             // STEP 2: RED TEAM WATERFALL
@@ -698,7 +701,7 @@ app.post('/api/audit/stream', async (req, res) => {
         sendEvent('log', { prefix: 'SYS', message: 'Analysis complete. Parsing deterministic JSON payload...' });
         let auditData;
         try {
-            let cleanJSON = extractJSON(fullJsonOutput.replace(/```json/gi, "").replace(/```/g, "").trim());
+            let cleanJSON = extractJSON((fullJsonOutput || "").replace(/```json/gi, "").replace(/```/g, "").trim());
             auditData = JSON.parse(cleanJSON);
         } catch (jsonError) {
             sendEvent('log', { prefix: 'ERROR', message: `AI returned malformed JSON formatting. Reconstructing gracefully...` });
@@ -706,7 +709,7 @@ app.post('/api/audit/stream', async (req, res) => {
                 score: 5,
                 summary: "The analysis engine completed its scan, but the AI returned a malformed structural response. Please rerun the scan to get exact vulnerability mappings.",
                 invariants: [], critical: [], high: [], gas: [], good: [],
-                medium: [{ title: "Malformed Engine Output", description: "The underlying AI successfully executed but failed to format the output data properly.", remediated_code: fullJsonOutput.substring(0, 500) + "..." }]
+                medium: [{ title: "Malformed Engine Output", description: "The underlying AI successfully executed but failed to format the output data properly.", remediated_code: (fullJsonOutput || "").substring(0, 500) + "..." }]
             };
         }
 

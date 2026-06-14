@@ -1,5 +1,5 @@
-# Use an explicit, stable Node + Python base image
-FROM nikolaik/python-nodejs:python3.10-nodejs18-bullseye
+# Use an explicit, stable Node + Python base image (UPDATED TO NODE 20)
+FROM nikolaik/python-nodejs:python3.10-nodejs20-bullseye
 
 # Install system dependencies required by Foundry
 RUN apt-get update && apt-get install -y \
@@ -33,7 +33,7 @@ RUN pip install tree-sitter tree-sitter-solidity
 # Copy the rest of the server code
 COPY . .
 
-# Expose the port Render expects
+# Expose the port
 EXPOSE 3001
 
 # Command to spin up the secure engine
