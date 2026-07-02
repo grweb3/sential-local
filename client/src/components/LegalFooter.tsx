@@ -9,8 +9,8 @@ export default function LegalFooter() {
         <Link to="/privacy" className="hover:text-[var(--text-1)] hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.3)] transition-all duration-300 uppercase tracking-widest font-bold">Privacy Policy</Link>
       </div>
       <div className="flex flex-col gap-2 items-center opacity-60 mt-2">
-        <span className="hover:text-[var(--text-2)] transition-colors cursor-default">Contact: compliance@blockvia.xyz</span>
-        <span className="hover:text-[var(--text-2)] transition-colors cursor-default">BlockVIA Pvt Ltd. | Hyderabad, Telangana, India</span>
+        <span className="hover:text-[var(--text-2)] transition-colors cursor-default">Contact: Github: grweb3 X/Twitter: @gr_web3>
+        <span className="hover:text-[var(--text-2)] transition-colors cursor-default"></span>
       </div>
     </div>
   );
